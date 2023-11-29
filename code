@@ -1,0 +1,129 @@
+import random
+import string
+import hashlib
+import getpass
+
+class PasswordGenerator:
+    def __init__(self):
+        pass
+
+    def generate_password(self, length=12, use_letters=True, use_numbers=True, use_special=True):
+        characters = ""
+        if use_letters:
+            characters += string.ascii_letters
+        if use_numbers:
+            characters += string.digits
+        if use_special:
+            characters += string.punctuation
+
+        password = ''.join(random.choice(characters) for _ in range(length))
+        return password
+
+class PasswordManager:
+    def __init__(self):
+        self.passwords = {}
+
+    def store_password(self, website, username, password):
+        # Simulación de almacenamiento seguro, aquí se debería implementar una lógica de almacenamiento cifrado
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        self.passwords[(website, username)] = hashed_password
+
+    def retrieve_password(self, website, username):
+        # Simulación de recuperación de contraseña, aquí se implementaría la lógica de descifrado
+        hashed_password = self.passwords.get((website, username))
+        return hashed_password
+
+    def reset_password(self, website, username):
+        # Restablece la contraseña a una generada aleatoriamente
+        if (website, username) in self.passwords:
+            new_password = PasswordGenerator().generate_password()
+            self.store_password(website, username, new_password)
+            print(f"Contraseña para {website}, {username} restablecida a: {new_password}")
+        else:
+            print(f"No se encontró ninguna contraseña para {website}, {username}.")
+
+    def delete_password(self, website, username):
+        # Elimina una contraseña almacenada
+        if (website, username) in self.passwords:
+            del self.passwords[(website, username)]
+            print(f"Contraseña para {website}, {username} eliminada.")
+        else:
+            print(f"No se encontró ninguna contraseña para {website}, {username}.")
+
+    def display_passwords(self):
+        print("Contraseñas almacenadas:")
+        for (website, username), _ in self.passwords.items():
+            print(f"Website: {website}, Username: {username}")
+
+# Función para la entrada segura del usuario
+def get_user_input():
+    website = input("Ingrese el nombre del sitio web: ")
+    username = input("Ingrese su nombre de usuario: ")
+    return website, username
+
+# Crear instancias de las clases
+password_generator = PasswordGenerator()
+password_manager = PasswordManager()
+
+while True:
+    print("\n1. Generar y almacenar contraseña")
+    print("2. Recuperar contraseña almacenada")
+    print("3. Resetear contraseña")
+    print("4. Eliminar contraseña almacenada")
+    print("5. Mostrar contraseñas almacenadas")
+    print("6. Salir")
+
+    choice = input("Ingrese su elección (1-6): ")
+
+    if choice == "1":
+        # Obtener la entrada segura del usuario
+        website, username = get_user_input()
+
+        # Permitir al usuario personalizar la generación de la contraseña
+        length = int(input("Ingrese la longitud de la contraseña: "))
+        use_letters = input("¿Incluir letras? (Sí/No): ").lower() == 'si'
+        use_numbers = input("¿Incluir números? (Sí/No): ").lower() == 'si'
+        use_special = input("¿Incluir caracteres especiales? (Sí/No): ").lower() == 'si'
+
+        # Generar y mostrar la contraseña
+        generated_password = password_generator.generate_password(length, use_letters, use_numbers, use_special)
+        print(f"Contraseña generada: {generated_password}")
+
+        # Almacenar la contraseña de manera segura
+        password_manager.store_password(website, username, generated_password)
+
+    elif choice == "2":
+        # Obtener la entrada del usuario para recuperar contraseña
+        website, username = get_user_input()
+
+        # Recuperar y mostrar la contraseña almacenada
+        retrieved_password = password_manager.retrieve_password(website, username)
+        if retrieved_password:
+            print(f"Contraseña almacenada para {website}, {username}: {retrieved_password}")
+        else:
+            print("No se encontró ninguna contraseña para el sitio web y usuario proporcionados.")
+
+    elif choice == "3":
+        # Obtener la entrada del usuario para resetear contraseña
+        website, username = get_user_input()
+
+        # Resetear la contraseña
+        password_manager.reset_password(website, username)
+
+    elif choice == "4":
+        # Obtener la entrada del usuario para eliminar contraseña
+        website, username = get_user_input()
+
+        # Eliminar la contraseña almacenada
+        password_manager.delete_password(website, username)
+
+    elif choice == "5":
+        # Mostrar todas las contraseñas almacenadas
+        password_manager.display_passwords()
+
+    elif choice == "6":
+        print("Saliendo del programa.")
+        break
+
+    else:
+        print("Elección no válida. Por favor, ingrese un número del 1 al 6.")
